@@ -2,29 +2,10 @@ package main
 
 import (
 	"fmt"
-	"sync"
-	"time"
 )
 
 func introduction() {
 	fmt.Println("This code shows how a buffered channel works")
-}
-
-func timeout(wg *sync.WaitGroup, t time.Duration) bool {
-	ch := make(chan int)
-	go func() {
-		defer close(ch)
-		time.Sleep(5 * time.Second)
-
-		wg.Wait()
-	}()
-
-	select {
-	case <-ch:
-		return false
-	case <-time.After(t):
-		return true
-	}
 }
 
 func main() {
