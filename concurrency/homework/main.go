@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 )
 
 func startHttpServer(wg *sync.WaitGroup) *http.Server {
@@ -15,8 +18,6 @@ func startHttpServer(wg *sync.WaitGroup) *http.Server {
 	})
 
 	go func() {
-		defer wg.Done()
-
 		if err := server.ListenAndServe(); err != nil {
 			fmt.Printf("error: %v\n", err)
 		}
@@ -29,9 +30,23 @@ func startHttpServer(wg *sync.WaitGroup) *http.Server {
 
 func main() {
 	fmt.Println("Start")
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 	server := startHttpServer(&wg)
+
+	s := <-sig
+	switch s {
+	case syscall.SIGTERM:
+		fmt.Println("Received SIGTERM")
+		wg.Done()
+	case syscall.SIGINT:
+		fmt.Println("Received SIGINT")
+		wg.Done()
+	}
 
 	wg.Wait()
 	if err := server.Shutdown(context.Background()); err != nil {
