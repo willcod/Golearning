@@ -7,7 +7,7 @@ import (
 )
 
 func introduction() {
-	fmt.Println("This code shows how to use mutex")
+	fmt.Println("This code shows how to use RWmutex")
 }
 
 var Password = secret{password: "123456"}
